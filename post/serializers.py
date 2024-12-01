@@ -19,9 +19,11 @@ class RatingSerializer(serializers.ModelSerializer):
         post = validated_data['post']
         user = validated_data['user']
 
-        # Check if the user has already rated this post
-        if Rating.objects.filter(post=post, user=user).exists():
-            raise serializers.ValidationError("You have already rated this post.")
+        existing_rating: Rating = Rating.objects.filter(post=post, user=user).first()
+        if existing_rating:
+            existing_rating.rating = validated_data['rating']
+            existing_rating.save()
+            return existing_rating
 
         return super().create(validated_data)
 

@@ -21,8 +21,5 @@ class Rating(models.Model):
     user = models.ForeignKey(User, related_name='ratings', on_delete=models.CASCADE)
     rating = models.PositiveIntegerField(default=1)
 
-    class Meta:
-        unique_together = ('post', 'user')
-
     def __str__(self):
         return f"{self.user.username} rated {self.post.title} with {self.rating}"
