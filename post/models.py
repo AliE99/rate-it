@@ -5,15 +5,11 @@ from django.db import models
 class Post(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
+    average_rating = models.FloatField(default=0)
+    rating_count = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title
-
-    def average_rating(self):
-        return self.ratings.aggregate(models.Avg('rating'))['rating__avg'] or 0.0
-
-    def rating_count(self):
-        return self.ratings.count()
 
 
 class Rating(models.Model):
