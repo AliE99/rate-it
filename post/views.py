@@ -51,8 +51,8 @@ class PostRatingView(APIView):
             return Response({"detail": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # Get the average rating and rating count
-        average_rating = post.average_rating()
-        rating_count = post.rating_count()
+        average_rating = post.average_rating
+        rating_count = post.rating_count
 
         return Response({
             'average_rating': average_rating,
