@@ -1,0 +1,1 @@
+celery -A rateIt worker --loglevel=info
