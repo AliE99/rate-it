@@ -1,5 +1,4 @@
-# serializers.py
-
+from django.db import transaction
 from rest_framework import serializers
 
 from .models import Rating, Post
@@ -20,31 +19,27 @@ class RatingSerializer(serializers.ModelSerializer):
         user = validated_data['user']
         new_rating = validated_data['rating']
 
-        # Check if the user has already rated this post
-        existing_rating: Rating = Rating.objects.filter(post=post, user=user).first()
+        with transaction.atomic():
+            rating, created = Rating.objects.get_or_create(
+                post=post,
+                user=user,
+                defaults={'rating': new_rating}
+            )
 
-        if existing_rating:
-            # User has already rated, update the rating
-            old_rating = existing_rating.rating
-            existing_rating.rating = new_rating
-            existing_rating.save()
+            if not created:
+                old_rating = rating.rating
+                rating.rating = new_rating
+                rating.save()
 
-            # Update the average rating based on the change
-            self.__update_average_on_rating_change(post, old_rating, new_rating)
-            return existing_rating
+                total_rating = post.average_rating * post.rating_count - old_rating + new_rating
+            else:
+                post.rating_count += 1
+                total_rating = post.average_rating * (post.rating_count - 1) + new_rating
 
-        # User has not rated yet, create a new rating
-        self.__update_average_and_rating_count(post, new_rating)
-        return super().create(validated_data)
+            post.average_rating = total_rating / post.rating_count
+            post.save()
 
-    def __update_average_on_rating_change(self, post, old_rating, new_rating):
-        post.average_rating = ((post.average_rating * post.rating_count) - old_rating + new_rating) / post.rating_count
-        post.save()
-
-    def __update_average_and_rating_count(self, post, rating):
-        post.rating_count += 1
-        post.average_rating = (post.average_rating * post.rating_count + rating) / post.rating_count
-        post.save()
+        return rating
 
 
 class PostSerializer(serializers.ModelSerializer):
