@@ -1,7 +1,7 @@
-from django.db import transaction
 from rest_framework import serializers
 
 from .models import Rating, Post
+from .tasks import update_post_average_rating
 
 
 class RatingSerializer(serializers.ModelSerializer):
@@ -19,25 +19,12 @@ class RatingSerializer(serializers.ModelSerializer):
         user = validated_data['user']
         new_rating = validated_data['rating']
 
-        with transaction.atomic():
-            rating, created = Rating.objects.get_or_create(
-                post=post,
-                user=user,
-                defaults={'rating': new_rating}
-            )
-
-            if not created:
-                old_rating = rating.rating
-                rating.rating = new_rating
-                rating.save()
-
-                total_rating = post.average_rating * post.rating_count - old_rating + new_rating
-            else:
-                post.rating_count += 1
-                total_rating = post.average_rating * (post.rating_count - 1) + new_rating
-
-            post.average_rating = total_rating / post.rating_count
-            post.save()
+        rating, created = Rating.objects.get_or_create(
+            post=post,
+            user=user,
+            defaults={'rating': new_rating}
+        )
+        update_post_average_rating.delay(post.id, rating.id, new_rating, created)
 
         return rating
 
