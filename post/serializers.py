@@ -36,7 +36,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'average_rating', 'rating_count', 'user_rating']
+        fields = ['id', 'title', 'content', 'average_rating', 'ema_rating', 'rating_count', 'user_rating']
 
     def get_user_rating(self, obj):
         user = self.context.get('request').user

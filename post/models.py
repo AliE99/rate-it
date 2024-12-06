@@ -1,3 +1,5 @@
+from typing import Final
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -7,6 +9,9 @@ class Post(models.Model):
     content = models.TextField()
     average_rating = models.FloatField(default=0)
     rating_count = models.IntegerField(default=0)
+    ema_rating = models.FloatField(default=0)
+
+    ALPHA: Final[float] = 0.1
 
     def __str__(self):
         return self.title

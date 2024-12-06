@@ -22,4 +22,10 @@ def update_post_average_rating(post_id, rating_id, new_rating: int, created: boo
             total_rating = post.average_rating * (post.rating_count - 1) + new_rating
 
         post.average_rating = total_rating / post.rating_count
+
+        if post.rating_count == 1:
+            post.ema_rating = new_rating
+        else:
+            post.ema_rating = Post.ALPHA * new_rating + (1 - Post.ALPHA) * post.ema_rating
+
         post.save()
