@@ -40,10 +40,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'post',
     'rest_framework_simplejwt',
+    'drf_spectacular',
 ]
 
 # put on your settings.py file below INSTALLED_APPS
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
@@ -148,3 +150,10 @@ CELERY_BROKER_URL = 'redis://localhost:6379/4'  # Redis URL
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/4'
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Rate It',
+    'DESCRIPTION': 'This is the API documentation for the Rate It project',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
