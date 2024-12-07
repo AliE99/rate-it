@@ -7,6 +7,7 @@ The **Rate It** is a Django Application where users can create and view posts an
 - [Project Overview](#project-overview)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Performance and Rating Stability](#performance-and-rating-stability)
 
 
 ## Project Overview
@@ -99,6 +100,33 @@ This project uses JWT for authentication. To access endpoints, obtain a token th
 Authorization: Bearer <token>
 ```
 
-## API Endpoints
+**API Endpoints**
 
 You can open http://localhost:8000/api/docs/ for documentation and working with APIs.
+
+
+## Performance and Rating Stability
+
+To ensure the system can handle millions of ratings efficiently under heavy load and to stabilize ratings against short-term fluctuations, the following strategies have been implemented:
+
+#### 1. **Delayed Updates**
+   Instead of immediately updating the average rating of a post upon each new rating, the updates are queued and processed asynchronously using background workers(Celery). This approach ensures that the system is not blocked by expensive rating calculations and can scale more effectively under high traffic.
+
+   **Status:** Done
+
+#### 2. **Saved Average Rating and Count in the Model**
+   To avoid recalculating the average rating every time a rating is added, the average rating and the number of ratings are saved directly in the Post model. This improves performance by reducing the need for repetitive calculations.
+
+   **Status:** Done
+
+#### 3. **Indexing for Faster Queries**
+   To optimize query performance, particularly for filtering ratings based on the post and user fields, the `Rating` model fields will be indexed. This ensures faster lookups and smoother operations when querying for user ratings on specific posts.
+
+   **Status:** To Do
+
+#### 4. **Exponential Moving Average for Rating Stability**
+   To prevent short-term events (such as organized campaigns or emotional ratings) from dramatically affecting the post's average rating, an exponential moving average (EMA) mechanism has been added. This allows the system to smooth out sudden spikes and maintain a more stable average rating over time.
+
+   **Status:** Done
+
+These strategies together ensure that the system can handle large-scale usage efficiently while maintaining accurate and stable ratings, even under heavy load or in the face of short-term rating spikes.
